@@ -4,7 +4,7 @@
 conn = sqlite3.connect("orders.db")
 cur = conn.cursor()
 
-# Create tables
+# Create tables and insert data
 cur.executescript("""
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS customers;
@@ -39,7 +39,7 @@ INSERT INTO orders VALUES
 """)
 conn.commit()
 
-# Query (a): INNER JOIN customer name and order amount
+# Query (a): INNER JOIN
 print("--- Customer orders (joined) ---")
 cur.execute("""
 SELECT c.name, o.amount
@@ -49,7 +49,7 @@ INNER JOIN orders o ON c.customer_id = o.customer_id;
 for row in cur.fetchall():
     print(row)
 
-# Query (b): Total spend per customer using SUM()
+# Query (b): Total spend per customer
 print("\n--- Total spend per customer ---")
 cur.execute("""
 SELECT c.name, SUM(o.amount) AS total_spend
@@ -57,6 +57,18 @@ FROM customers c
 JOIN orders o ON c.customer_id = o.customer_id
 GROUP BY c.customer_id
 ORDER BY total_spend DESC;
+""")
+for row in cur.fetchall():
+    print(row)
+
+# Query (c): Cities with total spend > 10,000 using HAVING
+print("\n--- Cities with total spend > 10,000 ---")
+cur.execute("""
+SELECT c.city, SUM(o.amount) AS city_total
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.city
+HAVING city_total > 10000;
 """)
 for row in cur.fetchall():
     print(row)
